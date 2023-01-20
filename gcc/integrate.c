@@ -71,7 +71,8 @@ static rtx copy_for_inline	PROTO((rtx));
 static void integrate_parm_decls PROTO((tree, struct inline_remap *, rtvec));
 static void integrate_decl_tree	PROTO((tree, int, struct inline_remap *));
 static void save_constants_in_decl_trees PROTO ((tree));
-static void subst_constants	PROTO((rtx *, rtx, struct inline_remap *));
+static void subst_constants	PROTO((rtx *, rtx, struct inline_remap *,
+				       int));
 static void restore_constants	PROTO((rtx *));
 static void set_block_origin_self PROTO((tree));
 static void set_decl_origin_self PROTO((tree));
@@ -1708,7 +1709,7 @@ expand_inline_function (fndecl, parms, target, ignore, type,
 	  /* Compute the address in the area we reserved and store the
 	     value there.  */
 	  temp = copy_rtx_and_substitute (loc, map);
-	  subst_constants (&temp, NULL_RTX, map);
+	  subst_constants (&temp, NULL_RTX, map, 1);
 	  apply_change_group ();
 	  if (! memory_address_p (GET_MODE (temp), XEXP (temp, 0)))
 	    temp = change_address (temp, VOIDmode, XEXP (temp, 0));
@@ -1761,7 +1762,7 @@ expand_inline_function (fndecl, parms, target, ignore, type,
       else
 	{
 	  temp = copy_rtx_and_substitute (loc, map);
-	  subst_constants (&temp, NULL_RTX, map);
+	  subst_constants (&temp, NULL_RTX, map, 1);
 	  apply_change_group ();
 	  emit_move_insn (temp, structure_value_addr);
 	}
@@ -2107,9 +2108,10 @@ expand_inline_function (fndecl, parms, target, ignore, type,
 	&& REG_NOTES (insn))
       {
 	rtx tem = copy_rtx_and_substitute (REG_NOTES (insn), map);
+
 	/* We must also do subst_constants, in case one of our parameters
 	   has const type and constant value.  */
-	subst_constants (&tem, NULL_RTX, map);
+	subst_constants (&tem, NULL_RTX, map, 0);
 	apply_change_group ();
 	REG_NOTES (map->insn_map[INSN_UID (insn)]) = tem;
       }
@@ -2198,7 +2200,7 @@ integrate_parm_decls (args, map, arg_vector)
 	 debugging information contains the actual register, instead of the
 	 virtual register.   Do this by not passing an insn to
 	 subst_constants.  */
-      subst_constants (&new_decl_rtl, NULL_RTX, map);
+      subst_constants (&new_decl_rtl, NULL_RTX, map, 1);
       apply_change_group ();
       DECL_RTL (decl) = new_decl_rtl;
     }
@@ -2237,11 +2239,12 @@ integrate_decl_tree (let, level, map)
       if (DECL_RTL (t) != 0)
 	{
 	  DECL_RTL (d) = copy_rtx_and_substitute (DECL_RTL (t), map);
+
 	  /* Fully instantiate the address with the equivalent form so that the
 	     debugging information contains the actual register, instead of the
 	     virtual register.   Do this by not passing an insn to
 	     subst_constants.  */
-	  subst_constants (&DECL_RTL (d), NULL_RTX, map);
+	  subst_constants (&DECL_RTL (d), NULL_RTX, map, 1);
 	  apply_change_group ();
 	}
       /* These args would always appear unused, if not for this.  */
@@ -2778,9 +2781,14 @@ try_constants (insn, map)
   int i;
 
   map->num_sets = 0;
-  subst_constants (&PATTERN (insn), insn, map);
 
-  /* Apply the changes if they are valid; otherwise discard them.  */
+  /* First try just updating addresses, then other things.  This is
+     important when we have something like the store of a constant
+     into memory and we can update the memory address but the machine
+     does not support a constant source.  */
+  subst_constants (&PATTERN (insn), insn, map, 1);
+  apply_change_group ();
+  subst_constants (&PATTERN (insn), insn, map, 0);
   apply_change_group ();
 
   /* Show we don't know the value of anything stored or clobbered.  */
@@ -2828,16 +2836,19 @@ try_constants (insn, map)
    into insns; cse will do the latter task better.
 
    This function is also used to adjust address of items previously addressed
-   via the virtual stack variable or virtual incoming arguments registers.  */
+   via the virtual stack variable or virtual incoming arguments registers. 
+
+   If MEMONLY is nonzero, only make changes inside a MEM.  */
 
 static void
-subst_constants (loc, insn, map)
+subst_constants (loc, insn, map, memonly)
      rtx *loc;
      rtx insn;
      struct inline_remap *map;
+     int memonly;
 {
   rtx x = *loc;
-  register int i;
+  register int i, j;
   register enum rtx_code code;
   register char *format_ptr;
   int num_changes = num_validated_changes ();
@@ -2859,7 +2870,8 @@ subst_constants (loc, insn, map)
 
 #ifdef HAVE_cc0
     case CC0:
-      validate_change (insn, loc, map->last_cc0_value, 1);
+      if (! memonly)
+	validate_change (insn, loc, map->last_cc0_value, 1);
       return;
 #endif
 
@@ -2868,12 +2880,13 @@ subst_constants (loc, insn, map)
       /* The only thing we can do with a USE or CLOBBER is possibly do
 	 some substitutions in a MEM within it.  */
       if (GET_CODE (XEXP (x, 0)) == MEM)
-	subst_constants (&XEXP (XEXP (x, 0), 0), insn, map);
+	subst_constants (&XEXP (XEXP (x, 0), 0), insn, map, 0);
       return;
 
     case REG:
       /* Substitute for parms and known constants.  Don't replace
 	 hard regs used as user variables with constants.  */
+      if (!memonly)
       {
 	int regno = REGNO (x);
 
@@ -2891,7 +2904,7 @@ subst_constants (loc, insn, map)
 	 be a special hack and we don't know how to treat it specially.
 	 Consider for example mulsidi3 in m68k.md.
 	 Ordinary SUBREG of a REG needs this special treatment.  */
-      if (GET_CODE (SUBREG_REG (x)) == REG)
+      if (! memonly && GET_CODE (SUBREG_REG (x)) == REG)
 	{
 	  rtx inner = SUBREG_REG (x);
 	  rtx new = 0;
@@ -2901,7 +2914,7 @@ subst_constants (loc, insn, map)
 	     see what is inside, try to form the new SUBREG and see if that is
 	     valid.  We handle two cases: extracting a full word in an 
 	     integral mode and extracting the low part.  */
-	  subst_constants (&inner, NULL_RTX, map);
+	  subst_constants (&inner, NULL_RTX, map, 0);
 
 	  if (GET_MODE_CLASS (GET_MODE (x)) == MODE_INT
 	      && GET_MODE_SIZE (GET_MODE (x)) == UNITS_PER_WORD
@@ -2921,11 +2934,11 @@ subst_constants (loc, insn, map)
       break;
 
     case MEM:
-      subst_constants (&XEXP (x, 0), insn, map);
+      subst_constants (&XEXP (x, 0), insn, map, 0);
 
       /* If a memory address got spoiled, change it back.  */
-      if (insn != 0 && num_validated_changes () != num_changes
-	  && !memory_address_p (GET_MODE (x), XEXP (x, 0)))
+      if (! memonly && insn != 0 && num_validated_changes () != num_changes
+	  && ! memory_address_p (GET_MODE (x), XEXP (x, 0)))
 	cancel_changes (num_changes);
       return;
 
@@ -2938,7 +2951,7 @@ subst_constants (loc, insn, map)
 	rtx dest = *dest_loc;
 	rtx src, tem;
 
-	subst_constants (&SET_SRC (x), insn, map);
+	subst_constants (&SET_SRC (x), insn, map, memonly);
 	src = SET_SRC (x);
 
 	while (GET_CODE (*dest_loc) == ZERO_EXTRACT
@@ -2947,15 +2960,15 @@ subst_constants (loc, insn, map)
 	  {
 	    if (GET_CODE (*dest_loc) == ZERO_EXTRACT)
 	      {
-		subst_constants (&XEXP (*dest_loc, 1), insn, map);
-		subst_constants (&XEXP (*dest_loc, 2), insn, map);
+		subst_constants (&XEXP (*dest_loc, 1), insn, map, memonly);
+		subst_constants (&XEXP (*dest_loc, 2), insn, map, memonly);
 	      }
 	    dest_loc = &XEXP (*dest_loc, 0);
 	  }
 
 	/* Do substitute in the address of a destination in memory.  */
 	if (GET_CODE (*dest_loc) == MEM)
-	  subst_constants (&XEXP (*dest_loc, 0), insn, map);
+	  subst_constants (&XEXP (*dest_loc, 0), insn, map, 0);
 
 	/* Check for the case of DEST a SUBREG, both it and the underlying
 	   register are less than one word, and the SUBREG has the wider mode.
@@ -3017,7 +3030,7 @@ subst_constants (loc, insn, map)
 
 	case 'e':
 	  if (XEXP (x, i))
-	    subst_constants (&XEXP (x, i), insn, map);
+	    subst_constants (&XEXP (x, i), insn, map, memonly);
 	  break;
 
 	case 'u':
@@ -3028,11 +3041,9 @@ subst_constants (loc, insn, map)
 
 	case 'E':
 	  if (XVEC (x, i) != NULL && XVECLEN (x, i) != 0)
-	    {
-	      int j;
-	      for (j = 0; j < XVECLEN (x, i); j++)
-		subst_constants (&XVECEXP (x, i, j), insn, map);
-	    }
+	    for (j = 0; j < XVECLEN (x, i); j++)
+	      subst_constants (&XVECEXP (x, i, j), insn, map, memonly);
+
 	  break;
 
 	default:
@@ -3042,7 +3053,8 @@ subst_constants (loc, insn, map)
 
   /* If this is a commutative operation, move a constant to the second
      operand unless the second operand is already a CONST_INT.  */
-  if ((GET_RTX_CLASS (code) == 'c' || code == NE || code == EQ)
+  if (! memonly
+      && (GET_RTX_CLASS (code) == 'c' || code == NE || code == EQ)
       && CONSTANT_P (XEXP (x, 0)) && GET_CODE (XEXP (x, 1)) != CONST_INT)
     {
       rtx tem = XEXP (x, 0);
@@ -3051,6 +3063,7 @@ subst_constants (loc, insn, map)
     }
 
   /* Simplify the expression in case we put in some constants.  */
+  if (!memonly)
   switch (GET_RTX_CLASS (code))
     {
     case '1':
