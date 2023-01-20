@@ -51,14 +51,16 @@ jobs:
       - name: Create release archive
         shell: bash
         run: |
-          cp gcc/xgcc gcc/gcc
-          chmod +x gcc/gcc
-          chmod +x gcc/cc1
-          chmod +x gcc/cc1plus
-          chmod +x gcc/cccp
-          chmod +x gcc/cpp
-          chmod +x gcc/g++
-          tar -czf ${{ matrix.TARGET.ARCHIVE_NAME }} gcc/gcc gcc/cc1 gcc/cc1plus gcc/cpp gcc/cccp gcc/g++
+          cd gcc
+          cp xgcc gcc
+          chmod +x gcc
+          chmod +x cc1
+          chmod +x cc1plus
+          chmod +x cccp
+          chmod +x cpp
+          chmod +x g++
+          tar -czf ../${{ matrix.TARGET.ARCHIVE_NAME }} gcc cc1 cc1plus cpp cccp g++
+          cd ..
 
       - name: Upload archive
         uses: actions/upload-artifact@v3
