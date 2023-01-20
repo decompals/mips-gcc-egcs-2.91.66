@@ -22,7 +22,7 @@ jobs:
           #     ARCHIVE_NAME: 'mips-gcc-egcs-2.91.66-mac.tar.gz'
           #   }
 
-    name: Building binutils for ${{ matrix.TARGET.OS }}
+    name: Building gcc for ${{ matrix.TARGET.OS }}
     steps:
       - uses: actions/checkout@v3
 
@@ -51,19 +51,14 @@ jobs:
       - name: Create release archive
         shell: bash
         run: |
-          cp gcc/xgcc gcc
-          cp gcc/cc1 cc1
-          cp gcc/cc1plus cc1plus
-          cp gcc/cccp cccp
-          cp gcc/cpp cpp
-          cp gcc/g++ g++
-          chmod +x gcc
-          chmod +x cc1
-          chmod +x cc1plus
-          chmod +x cccp
-          chmod +x cpp
-          chmod +x g++
-          tar -czf ${{ matrix.TARGET.ARCHIVE_NAME }} gcc cc1 cc1plus cpp cccp g++
+          cp gcc/xgcc gcc/gcc
+          chmod +x gcc/gcc
+          chmod +x gcc/cc1
+          chmod +x gcc/cc1plus
+          chmod +x gcc/cccp
+          chmod +x gcc/cpp
+          chmod +x gcc/g++
+          tar -czf ${{ matrix.TARGET.ARCHIVE_NAME }} gcc/gcc gcc/cc1 gcc/cc1plus gcc/cpp gcc/cccp g++
 
       - name: Upload archive
         uses: actions/upload-artifact@v3
