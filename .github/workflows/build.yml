@@ -58,7 +58,7 @@ jobs:
           chmod +x gcc/cccp
           chmod +x gcc/cpp
           chmod +x gcc/g++
-          tar -czf ${{ matrix.TARGET.ARCHIVE_NAME }} gcc/gcc gcc/cc1 gcc/cc1plus gcc/cpp gcc/cccp g++
+          tar -czf ${{ matrix.TARGET.ARCHIVE_NAME }} gcc/gcc gcc/cc1 gcc/cc1plus gcc/cpp gcc/cccp gcc/g++
 
       - name: Upload archive
         uses: actions/upload-artifact@v3
