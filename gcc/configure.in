@@ -2084,6 +2084,54 @@ for machine in $build $host $target; do
 			use_collect2=yes
 		fi
 	        ;;
+	mips*64el*-*-linux-gnu*)	  # Little endian MIPS64 running Linux
+		xm_file=mips/xm-linux.h   # with ELF format using glibc 2
+		xmake_file=x-linux	  # aka Linux C library 6
+		tm_file=mips/llinux64.h
+		tmake_file=mips/t-linux
+		extra_parts="crtbegin.o crtbeginS.o crtend.o crtendS.o"
+		fixincludes=Makefile.in   # On Linux, headers are ok already.
+		gnu_ld=yes
+ 		if [[ x$enable_threads = xyes ]]; then
+ 			thread_file='posix'
+ 		fi
+		;;
+	mips*64*-*-linux-gnu*)		  # Big endian MIPS64 running Linux
+		xm_file=mips/xm-linux.h   # with ELF format using glibc 2
+		xmake_file=x-linux	  # aka Linux C library 6
+		tm_file=mips/linux64.h
+		tmake_file=mips/t-linux
+		extra_parts="crtbegin.o crtbeginS.o crtend.o crtendS.o"
+		fixincludes=Makefile.in   # On Linux, headers are ok already.
+		gnu_ld=yes
+ 		if [[ x$enable_threads = xyes ]]; then
+ 			thread_file='posix'
+ 		fi
+		;;
+	mips*el-*-linux-gnu*)		  # Little endian MIPS running Linux
+		xm_file=mips/xm-linux.h   # with ELF format using glibc 2
+		xmake_file=x-linux	  # aka Linux C library 6
+		tm_file=mips/llinux.h
+		tmake_file=mips/t-linux
+		extra_parts="crtbegin.o crtbeginS.o crtend.o crtendS.o"
+		fixincludes=Makefile.in   # On Linux, headers are ok already.
+		gnu_ld=yes
+ 		if [[ x$enable_threads = xyes ]]; then
+ 			thread_file='posix'
+ 		fi
+		;;
+	mips*-*-linux-gnu*)		  # Big endian MIPS running Linux
+		xm_file=mips/xm-linux.h   # with ELF format using glibc 2
+		xmake_file=x-linux	  # aka Linux C library 6
+		tm_file=mips/linux.h
+		tmake_file=mips/t-linux
+		extra_parts="crtbegin.o crtbeginS.o crtend.o crtendS.o"
+		fixincludes=Makefile.in   # On Linux, headers are ok already.
+		gnu_ld=yes
+ 		if [[ x$enable_threads = xyes ]]; then
+ 			thread_file='posix'
+ 		fi
+		;;
 	mips-*-riscos[[56789]]bsd*)
 		tm_file=mips/bsd-5.h	# MIPS BSD 4.3, RISC-OS 5.0
 		if [[ x$stabs = xyes ]]; then

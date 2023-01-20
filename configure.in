@@ -251,6 +251,7 @@ if false && [ "${host}" = "${target}" ] && [ x${enable_shared} = x ]; then
   case "${target}" in
     alpha*-dec-osf*)	enable_shared=yes ;;
     alpha*-*-linux*)	enable_shared=yes ;;
+    mips*-*-linux*)	enable_shared=yes ;;
     mips-sgi-irix5*)	enable_shared=yes ;;
     *)			enable_shared=no ;;
   esac
@@ -587,6 +588,19 @@ case "${target}" in
   i[3456]86-*-go32* | i[3456]-*-msdosdjgpp*)
     # but don't build gdb
     noconfigdirs="$noconfigdirs gdb target-libg++ target-libstdc++ target-libio target-librx"
+    ;;
+  mips64*-*-linux*)
+    # newlib is not 64 bit ready
+    # gprof isn't supported for MIPS
+    noconfigdirs="$noconfigdirs gprof target-newlib target-libgloss"
+    # linux has rx in libc
+    skipdirs="$skipdirs target-librx"
+    ;;
+  mips*-*-linux*)
+    # gprof isn't supported for MIPS
+    noconfigdirs="$noconfigdirs gprof"
+    # linux has rx in libc
+    skipdirs="$skipdirs target-librx"
     ;;
   *-*-linux*)
     # linux has rx in libc
