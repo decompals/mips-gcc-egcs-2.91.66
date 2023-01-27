@@ -135,3 +135,10 @@ gcc/tree-check.h
 gcc/unprotoize
 gcc/xgcc
 gcc/xlimits.h
+
+gcc/autom4te.cache/requests
+gcc/autom4te.cache/output.*
+gcc/autom4te.cache/traces.*
+gcc/config.in~
+gcc/config.bak
+gcc/configure~

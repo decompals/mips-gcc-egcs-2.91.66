@@ -31,7 +31,7 @@ jobs:
         if: matrix.TARGET.OS == 'ubuntu-20.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential bison file gperf gcc gcc-multilib
+          sudo apt-get install -y build-essential bison file gperf gcc gcc-multilib autoconf
       - name: Configure for mips
         shell: bash
         run: |
