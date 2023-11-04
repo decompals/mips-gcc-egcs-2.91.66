@@ -4090,12 +4090,12 @@ override_options ()
     target_flags |= MASK_LONG64;
 
   /* ??? This doesn't work yet, so don't let people try to use it.  */
-  //if (mips_abi == ABI_32)
-  //  error ("The -mabi=32 support does not work yet.");
+  if (mips_abi == ABI_32)
+    error ("The -mabi=32 support does not work yet.");
 
 #else
-  if (mips_abi_string)
-    error ("This target does not support the -mabi switch.");
+  //if (mips_abi_string)
+  //  error ("This target does not support the -mabi switch.");
 #endif
 
 #ifdef MIPS_CPU_STRING_DEFAULT
