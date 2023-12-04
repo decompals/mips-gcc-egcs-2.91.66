@@ -13,14 +13,16 @@ jobs:
               OS: 'ubuntu-20.04',
               CFLAGS: '-static -std=gnu89 -m32',
               HOST: 'i386-pc-linux',
-              ARCHIVE_NAME: 'mips-gcc-egcs-2.91.66-linux.tar.gz'
+              ARCHIVE_NAME: 'mips-gcc-egcs-2.91.66-linux.tar.gz',
+              HOST_GCC: 'gcc'
             }
-          # - {
-          #     OS: 'macos-latest',
-          #     CFLAGS: '-DDARWIN -std=gnu89 -Wno-return-type -Wno-error -Wno-implicit-function-declaration',
-          #     HOST: 'i386-apple-darwin',
-          #     ARCHIVE_NAME: 'mips-gcc-egcs-2.91.66-mac.tar.gz'
-          #   }
+          - {
+              OS: 'macos-latest',
+              CFLAGS: '-DDARWIN -std=gnu89 -Wno-return-type -Wno-error -Wno-implicit-function-declaration',
+              HOST: 'i386-apple-darwin',
+              ARCHIVE_NAME: 'mips-gcc-egcs-2.91.66-mac.tar.gz'
+              HOST_GCC: 'gcc-11'
+            }
 
     name: Building gcc for ${{ matrix.TARGET.OS }}
     steps:
@@ -35,11 +37,12 @@ jobs:
       - name: Configure for mips
         shell: bash
         run: |
-          ./configure --target=mips-linux --prefix=/opt/cross --with-gnu-as --disable-gprof --disable-gdb --disable-werror --host=${{ matrix.TARGET.HOST }} --build=${{ matrix.TARGET.HOST }}
+          CC="${{ matrix.TARGET.HOST_GCC }}" CFLAGS="-Wno-implicit-int" ./configure --target=mips-linux --prefix=/opt/cross --with-gnu-as --disable-gprof --disable-gdb --disable-werror --host=${{ matrix.TARGET.HOST }} --build=${{ matrix.TARGET.HOST }}
 
       - name: Make
         shell: bash
         run: |
+          touch gcc/c-parse.c   # makes `make` ignore regeneration of this file
           make -C gcc CFLAGS="${{ matrix.TARGET.CFLAGS }}" xgcc cc1 cc1plus cpp cccp g++
       - name: Test for file
         shell: bash
