@@ -42,7 +42,7 @@ jobs:
       - name: Make
         shell: bash
         run: |
-          touch gcc/c-parse.c   # makes `make` ignore regeneration of this file
+          touch gcc/c-parse.c gcc/cexp.c gcc/cp/parse.c  # makes `make` ignore regeneration of the .y files
           make -C gcc CFLAGS="${{ matrix.TARGET.CFLAGS }}" xgcc cc1 cc1plus cpp cccp g++
       - name: Test for file
         shell: bash
