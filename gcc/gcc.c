@@ -1092,22 +1092,7 @@ char *
 my_strerror(e)
      int e;
 {
-#ifdef HAVE_STRERROR
-
   return strerror(e);
-
-#else
-
-  static char buffer[30];
-  if (!e)
-    return "cannot access";
-
-  if (e > 0 && e < sys_nerr)
-    return sys_errlist[e];
-
-  sprintf (buffer, "Unknown error %d", e);
-  return buffer;
-#endif
 }
 
 static char *
