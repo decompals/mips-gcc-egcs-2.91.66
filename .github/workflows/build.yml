@@ -40,7 +40,7 @@ jobs:
       - name: Make
         shell: bash
         run: | # The generated `c-parse.c` is already commited on the repo, so we touch it to avoid regenerating it (trying to build old lex/yacc files with modern tools fails)
-          touch c-parse.c
+          touch gcc/c-parse.c
           make -C gcc CFLAGS="${{ matrix.TARGET.CFLAGS }}" xgcc cc1 cc1plus cpp cccp g++
 
       - name: Test for file
