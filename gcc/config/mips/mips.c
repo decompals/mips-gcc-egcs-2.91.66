@@ -4094,8 +4094,8 @@ override_options ()
     error ("The -mabi=32 support does not work yet.");
 
 #else
-  if (mips_abi_string)
-    error ("This target does not support the -mabi switch.");
+  //if (mips_abi_string)
+  //  error ("This target does not support the -mabi switch.");
 #endif
 
 #ifdef MIPS_CPU_STRING_DEFAULT

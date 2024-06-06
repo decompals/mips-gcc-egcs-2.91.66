@@ -562,6 +562,7 @@ extern void		mips_select_section ();
   SUBTARGET_TARGET_OPTIONS						\
   { "cpu=",	&mips_cpu_string	},				\
   { "ips",	&mips_isa_string	},				\
+  { "abi=",	&mips_abi_string	},				\
   { "entry",	&mips_entry_string	},				\
   { "no-mips16", &mips_no_mips16_string	}                               \
 }
