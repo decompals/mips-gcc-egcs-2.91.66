@@ -17,11 +17,11 @@ jobs:
               HOST_GCC: 'gcc'
             }
           - {
-              OS: 'macos-latest',
+              OS: 'macos-14',
               CFLAGS: '-DDARWIN -std=gnu89 -Wno-return-type -Wno-error -Wno-implicit-function-declaration',
               HOST: 'i386-apple-darwin',
               ARCHIVE_NAME: 'mips-gcc-egcs-2.91.66-mac.tar.gz',
-              HOST_GCC: 'gcc-11'
+              HOST_GCC: 'gcc-13'
             }
 
     name: Building gcc for ${{ matrix.TARGET.OS }}
