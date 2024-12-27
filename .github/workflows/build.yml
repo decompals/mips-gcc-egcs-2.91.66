@@ -17,7 +17,7 @@ jobs:
               HOST_GCC: 'gcc'
             }
           - {
-              OS: 'macos-14',
+              OS: 'macos-13',
               CFLAGS: '-DDARWIN -std=gnu89 -Wno-return-type -Wno-error -Wno-implicit-function-declaration',
               HOST: 'i386-apple-darwin',
               ARCHIVE_NAME: 'mips-gcc-egcs-2.91.66-mac.tar.gz',
