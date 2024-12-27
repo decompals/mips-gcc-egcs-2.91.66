@@ -1,6 +1,6 @@
 name: Build
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -26,7 +26,7 @@ jobs:
 
     name: Building gcc for ${{ matrix.TARGET.OS }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install dependencies (Ubuntu)
         shell: bash
@@ -41,9 +41,12 @@ jobs:
 
       - name: Make
         shell: bash
-        run: |
-          touch gcc/c-parse.c gcc/cexp.c gcc/cp/parse.c  # makes `make` ignore regeneration of the .y files
+        run: | # The generated `c-parse.c` is already commited on the repo, so we touch it to avoid regenerating it (trying to build old lex/yacc files with modern tools fails)
+          touch gcc/c-parse.c
+          touch gcc/cp/parse.c
+          touch gcc/cexp.c
           make -C gcc CFLAGS="${{ matrix.TARGET.CFLAGS }}" xgcc cc1 cc1plus cpp cccp g++
+
       - name: Test for file
         shell: bash
         run: |

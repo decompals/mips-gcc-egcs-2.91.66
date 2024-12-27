@@ -653,7 +653,7 @@ static struct compiler default_compilers[] =
 		  %{g*} %{O*} %{W*} %{w} %{pedantic*} %{ansi} \
 		  %{pg:%{fomit-frame-pointer:%e-pg and -fomit-frame-pointer are incompatible}}\
 		  %{S:%W{o*}%{!o*:-o %b.s}}%{!S:-o %{|!pipe:%g.s}} |\n\
-                  %{!S:as %a %Y\
+                  %{!S:as %a %Y %{mabi*} %{irix-symtab}\
 		     %{c:%W{o*}%{!o*:-o %w%b%O}}%{!c:-o %d%w%u%O}\
                      %{!pipe:%g.s} %A\n }}}}"
   }},
@@ -677,7 +677,7 @@ static struct compiler default_compilers[] =
 		   %{--help:--help} \
 		   %{pg:%{fomit-frame-pointer:%e-pg and -fomit-frame-pointer are incompatible}}\
 		   %{S:%W{o*}%{!o*:-o %b.s}}%{!S:-o %{|!pipe:%g.s}} |\n\
-              %{!S:as %a %Y\
+              %{!S:as %a %Y %{mabi*} %{irix-symtab}\
 		      %{c:%W{o*}%{!o*:-o %w%b%O}}%{!c:-o %d%w%u%O}\
                       %{!pipe:%g.s} %A\n }}}}"
   }},
@@ -716,7 +716,7 @@ static struct compiler default_compilers[] =
 		   %{aux-info*}\
 		   %{pg:%{fomit-frame-pointer:%e-pg and -fomit-frame-pointer are incompatible}}\
 		   %{S:%W{o*}%{!o*:-o %b.s}}%{!S:-o %{|!pipe:%g.s}} |\n\
-              %{!S:as %a %Y\
+              %{!S:as %a %Y %{mabi*} %{irix-symtab}\
 		      %{c:%W{o*}%{!o*:-o %w%b%O}}%{!c:-o %d%w%u%O}\
                       %{!pipe:%g.s} %A\n }}}}"}},
   {".h", {"@c-header"}},
@@ -741,12 +741,12 @@ static struct compiler default_compilers[] =
 			%{aux-info*}\
 			%{pg:%{fomit-frame-pointer:%e-pg and -fomit-frame-pointer are incompatible}}\
 			%{S:%W{o*}%{!o*:-o %b.s}}%{!S:-o %{|!pipe:%g.s}} |\n\
-		     %{!S:as %a %Y\
+		     %{!S:as %a %Y %{mabi*} %{irix-symtab}\
 			     %{c:%W{o*}%{!o*:-o %w%b%O}}%{!c:-o %d%w%u%O}\
 			     %{!pipe:%g.s} %A\n }}}}"}},
   {".s", {"@assembler"}},
   {"@assembler",
-   {"%{!M:%{!MM:%{!E:%{!S:as %a %Y\
+   {"%{!M:%{!MM:%{!E:%{!S:as %a %Y %{mabi*} %{irix-symtab}\
 		            %{c:%W{o*}%{!o*:-o %w%b%O}}%{!c:-o %d%w%u%O}\
 			    %i %A\n }}}}"}},
   {".S", {"@assembler-with-cpp"}},
@@ -760,7 +760,7 @@ static struct compiler default_compilers[] =
         %{traditional-cpp:-traditional}\
 	%{g*} %{W*} %{w} %{pedantic*} %{H} %{d*} %C %{D*} %{U*} %{i*} %Z\
         %i %{!M:%{!MM:%{!E:%{!pipe:%g.s}}}}%{E:%W{o*}}%{M:%W{o*}}%{MM:%W{o*}} |\n",
-    "%{!M:%{!MM:%{!E:%{!S:as %a %Y\
+    "%{!M:%{!MM:%{!E:%{!S:as %a %Y %{mabi*} %{irix-symtab}\
                     %{c:%W{o*}%{!o*:-o %w%b%O}}%{!c:-o %d%w%u%O}\
 		    %{!pipe:%g.s} %A\n }}}}"}},
 #include "specs.h"
@@ -1092,22 +1092,7 @@ char *
 my_strerror(e)
      int e;
 {
-#ifdef HAVE_STRERROR
-
   return strerror(e);
-
-#else
-
-  static char buffer[30];
-  if (!e)
-    return "cannot access";
-
-  if (e > 0 && e < sys_nerr)
-    return sys_errlist[e];
-
-  sprintf (buffer, "Unknown error %d", e);
-  return buffer;
-#endif
 }
 
 static char *
