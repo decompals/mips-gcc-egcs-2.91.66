@@ -460,12 +460,20 @@ static int num_error_names = 0;
 static int sys_nerr;
 static const char **sys_errlist;
 
+#elif defined(DARWIN)
+
+// macOS added 'const' to these declarations, and clang complains if they are otherwise
+extern const int sys_nerr;
+extern const char *sys_errlist[];
+
+
 #else
 
 extern int sys_nerr;
 extern char *sys_errlist[];
 
 #endif
+
 
 
 /*
