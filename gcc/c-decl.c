@@ -5690,6 +5690,21 @@ grokfield (filename, line, declarator, declspecs, width)
 {
   tree value;
 
+  if (declarator == NULL_TREE && width == NULL_TREE)
+    {
+      /* This is an unnamed decl.  We only support unnamed
+	 structs/unions, so check for other things and refuse them.  */
+      tree type = TREE_VALUE (declspecs);
+
+      if (TREE_CODE (type) == TYPE_DECL)
+	type = TREE_TYPE (type);
+      if (TREE_CODE (type) != RECORD_TYPE && TREE_CODE (type) != UNION_TYPE)
+	{
+	  error ("unnamed fields of type other than struct or union are not allowed");
+	  return NULL_TREE;
+	}
+    }
+
   /* The corresponding pop_obstacks is in finish_decl.  */
   push_obstacks_nochange ();
 
