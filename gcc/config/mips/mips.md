@@ -9843,7 +9843,7 @@ move\\t%0,%z4\\n\\
 
   if (GET_CODE (operands[0]) != CONST_DOUBLE)
     abort ();
-  bcopy ((char *) &CONST_DOUBLE_LOW (operands[0]), (char *) &u, sizeof u);
+  REAL_VALUE_FROM_CONST_DOUBLE (u.d, operands[0]);
   assemble_real (u.d, SFmode);
   return \"\";
 }"
@@ -9860,7 +9860,7 @@ move\\t%0,%z4\\n\\
 
   if (GET_CODE (operands[0]) != CONST_DOUBLE)
     abort ();
-  bcopy ((char *) &CONST_DOUBLE_LOW (operands[0]), (char *) &u, sizeof u);
+  REAL_VALUE_FROM_CONST_DOUBLE (u.d, operands[0]);
   assemble_real (u.d, DFmode);
   return \"\";
 }"

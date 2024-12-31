@@ -2083,9 +2083,13 @@ immed_real_const_1 (d, mode)
      If one is found, return it.  */
 
   for (r = const_double_chain; r; r = CONST_DOUBLE_CHAIN (r))
-    if (! bcmp ((char *) &CONST_DOUBLE_LOW (r), (char *) &u, sizeof u)
-	&& GET_MODE (r) == mode)
-      return r;
+    {
+      REAL_VALUE_TYPE d2;
+
+      REAL_VALUE_FROM_CONST_DOUBLE (d2, r);
+      if (REAL_VALUES_IDENTICAL(d, d2) && GET_MODE (r) == mode)
+	return r;
+    }
 
   /* No; make a new one and add it to the chain.
 
@@ -2099,7 +2103,7 @@ immed_real_const_1 (d, mode)
   rtl_in_saveable_obstack ();
   r = rtx_alloc (CONST_DOUBLE);
   PUT_MODE (r, mode);
-  bcopy ((char *) &u, (char *) &CONST_DOUBLE_LOW (r), sizeof u);
+  CONST_DOUBLE_SET_REAL_VALUE (r, d);
   pop_obstacks ();
 
   /* Don't touch const_double_chain in nested function; see force_const_mem.
@@ -3220,8 +3224,7 @@ decode_rtx_const (mode, x, value)
       if (GET_MODE (x) != VOIDmode)
 	{
 	  value->mode = GET_MODE (x);
-	  bcopy ((char *) &CONST_DOUBLE_LOW (x),
-		 (char *) &value->un.du, sizeof value->un.du);
+	  REAL_VALUE_FROM_CONST_DOUBLE (value->un.du.d, x);
 	}
       else
 	{
@@ -3645,7 +3648,7 @@ output_constant_pool (fnname, fndecl)
 	  if (GET_CODE (x) != CONST_DOUBLE)
 	    abort ();
 
-	  bcopy ((char *) &CONST_DOUBLE_LOW (x), (char *) &u, sizeof u);
+	  REAL_VALUE_FROM_CONST_DOUBLE (u.d, x);
 	  assemble_real (u.d, pool->mode);
 	  break;
 

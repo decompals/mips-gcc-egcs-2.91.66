@@ -3450,12 +3450,11 @@ init_emit_once (line_numbers)
 	   mode = GET_MODE_WIDER_MODE (mode))
 	{
 	  rtx tem = rtx_alloc (CONST_DOUBLE);
-	  union real_extract u;
+	  REAL_VALUE_TYPE d;
 
-	  bzero ((char *) &u, sizeof u);  /* Zero any holes in a structure.  */
-	  u.d = i == 0 ? dconst0 : i == 1 ? dconst1 : dconst2;
+	  d = i == 0 ? dconst0 : i == 1 ? dconst1 : dconst2;
 
-	  bcopy ((char *) &u, (char *) &CONST_DOUBLE_LOW (tem), sizeof u);
+	  CONST_DOUBLE_SET_REAL_VALUE (tem, d);
 	  CONST_DOUBLE_MEM (tem) = cc0_rtx;
 	  PUT_MODE (tem, mode);
 

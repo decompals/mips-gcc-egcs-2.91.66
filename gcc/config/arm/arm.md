@@ -6215,7 +6215,7 @@
     case MODE_FLOAT:
     {
       union real_extract u;
-      bcopy ((char *) &CONST_DOUBLE_LOW (operands[0]), (char *) &u, sizeof u);
+      REAL_VALUE_FROM_CONST_DOUBLE (u.d, operands[0]);
       assemble_real (u.d, GET_MODE (operands[0]));
       break;
     }
@@ -6237,7 +6237,7 @@
     case MODE_FLOAT:
     {
       union real_extract u;
-      bcopy ((char *) &CONST_DOUBLE_LOW (operands[0]), (char *) &u, sizeof u);
+      REAL_VALUE_FROM_CONST_DOUBLE (u.d, operands[0]);
       assemble_real (u.d, GET_MODE (operands[0]));
       break;
     }
