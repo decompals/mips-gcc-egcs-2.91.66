@@ -444,17 +444,35 @@ union real_extract
    or cc0_rtx if it is not on the chain.  */
 #define CONST_DOUBLE_MEM(r) XEXP (r, 0)
 
-/* Given a CONST_DOUBLE in FROM, store into TO the value it represents.  */
 /* Function to return a real value (not a tree node)
    from a given integer constant.  */
 union tree_node;
 REAL_VALUE_TYPE real_value_from_int_cst	PROTO ((union tree_node *,
 						union tree_node *));
 
+/* The macros below now assume that REAL_VALUE_TYPE is a double and that
+   HOST_WIDE_INT is a 32-bit int.  */
+
+_Static_assert (sizeof (REAL_VALUE_TYPE) == sizeof (double),
+		"REAL_VALUE_TYPE is not a double");
+_Static_assert (sizeof (HOST_WIDE_INT) == 4,
+		"HOST_WIDE_INT is not a 32-bit int");
+
+/* Given a CONST_DOUBLE in FROM, store into TO the value it represents.  */
+
 #define REAL_VALUE_FROM_CONST_DOUBLE(to, from)		\
-do { union real_extract u;				\
-     bcopy ((char *) &CONST_DOUBLE_LOW ((from)), (char *) &u, sizeof u); \
-     to = u.d; } while (0)
+do { union real_extract __u;				\
+     __u.i[0] = CONST_DOUBLE_LOW (from);		\
+     __u.i[1] = CONST_DOUBLE_HIGH (from);		\
+     to = __u.d; } while (0)
+
+/* Given a CONST_DOUBLE in R, replace the value it represents with V.  */
+
+#define CONST_DOUBLE_SET_REAL_VALUE(r, v)		\
+do { union real_extract __u;				\
+     __u.d = (v);					\
+     CONST_DOUBLE_LOW (r) = __u.i[0];			\
+     CONST_DOUBLE_HIGH (r) = __u.i[1]; } while (0)
 
 /* Return a CONST_DOUBLE with value R and mode M.  */
 
