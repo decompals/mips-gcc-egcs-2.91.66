@@ -10,7 +10,7 @@ jobs:
       matrix:
         TARGET:
           - {
-              OS: 'ubuntu-20.04',
+              OS: 'ubuntu-22.04',
               CFLAGS: '-static -std=gnu89 -m32',
               HOST: 'i386-pc-linux',
               ARCHIVE_NAME: 'mips-gcc-egcs-2.91.66-linux.tar.gz',
@@ -24,14 +24,14 @@ jobs:
               HOST_GCC: 'gcc-13'
             }
 
-    name: Building gcc for ${{ matrix.TARGET.HOST }}
+    name: Building gcc for '${{ matrix.TARGET.HOST }}'
     steps:
       - name: Checkout repository
         uses: actions/checkout@main
 
       - name: Install dependencies (Ubuntu)
         shell: bash
-        if: matrix.TARGET.OS == 'ubuntu-20.04'
+        if: matrix.TARGET.OS == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential bison file gperf gcc gcc-multilib autoconf
