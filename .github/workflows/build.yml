@@ -17,16 +17,17 @@ jobs:
               HOST_GCC: 'gcc'
             }
           - {
-              OS: 'macos-13',
+              OS: 'macos-14',
               CFLAGS: '-DDARWIN -std=gnu89 -Wno-return-type -Wno-error -Wno-implicit-function-declaration',
               HOST: 'i386-apple-darwin',
               ARCHIVE_NAME: 'mips-gcc-egcs-2.91.66-macos.tar.gz',
               HOST_GCC: 'gcc-13'
             }
 
-    name: Building gcc for ${{ matrix.TARGET.OS }}
+    name: Building gcc for ${{ matrix.TARGET.HOST }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@main
 
       - name: Install dependencies (Ubuntu)
         shell: bash
@@ -69,9 +70,9 @@ jobs:
           cd ..
 
       - name: Upload archive
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@main
         with:
-          name: mips-gcc-egcs-2.91.66-${{ matrix.TARGET.OS }}
+          name: mips-gcc-egcs-2.91.66-${{ matrix.TARGET.HOST }}
           path: |
             ${{ matrix.TARGET.ARCHIVE_NAME }}
 
